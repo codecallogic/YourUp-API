@@ -61,3 +61,7 @@ exports.playSong = async (req, res) => {
     res.send('Error')
   }
 }
+
+exports.test = (req, res) => {
+  res.send('Hello')
+}
