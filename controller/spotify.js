@@ -27,19 +27,14 @@ exports.callback = async (req, res) => {
             process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_SECRET
         ).toString('base64'))
       },
+      withCredentials: true,
       json: true
   }
 
   request.post(authOptions, function(error, response, body) {
     let access_token = body.access_token
-    return res.status(202).cookie(
-      "spotifyToken", access_token, {
-      sameSite: 'strict',
-      expires: new Date(new Date().getTime() + (60 * 60 * 1000)),
-      httpOnly: true,
-      secure: false,
-      overwrite: true
-    }).redirect(process.env.SPOTIFY_FRONTEND_URI)
+
+    return res.redirect(`${process.env.SPOTIFY_FRONTEND_URI}?token=${access_token}`)
   })
 }
 

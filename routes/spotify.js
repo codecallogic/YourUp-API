@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const {login, callback, playSong, test} = require('../controller/spotify')
+const {login, callback, playSong, setCookie, test} = require('../controller/spotify')
 
 
 router.get('/spotify/login', login)
