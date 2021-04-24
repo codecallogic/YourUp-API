@@ -1,5 +1,6 @@
 const querystring = require('query-string');
 const request = require('request')
+const axios = require('axios')
 
 exports.login = async (req, res) => {
   res.redirect('https://accounts.spotify.com/authorize?'+
@@ -30,8 +31,33 @@ exports.callback = async (req, res) => {
   }
 
   request.post(authOptions, function(error, response, body) {
-      let access_token = body.access_token
-      let uri = process.env.SPOTIFY_FRONTEND_URI
-      res.redirect(uri + '?access_token=' + access_token)
+    let access_token = body.access_token
+    return res.status(202).cookie(
+      "spotifyToken", access_token, {
+      sameSite: 'strict',
+      expires: new Date(new Date().getTime() + (60 * 60 * 1000)),
+      httpOnly: true,
+      secure: false,
+      overwrite: true
+    }).redirect(process.env.SPOTIFY_FRONTEND_URI)
   })
+}
+
+exports.playSong = async (req, res) => {
+  const {spotifyURI, newToken} = req.body
+  
+  try {
+    const responsePlay = await axios.put(`https://api.spotify.com/v1/me/player/play`, {"uris": [`${spotifyURI}`]},{
+      headers: {
+        Accept: 'application/json',
+        ContentType: 'application/json',
+        Authorization: `Bearer ${newToken}`,
+      }
+    })
+    // console.log(responsePlay)
+    res.send('Success')
+  } catch (error) {
+    console.log(error.response.data)
+    res.send('Error')
+  }
 }
