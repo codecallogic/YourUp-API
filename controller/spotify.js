@@ -57,6 +57,94 @@ exports.playSong = async (req, res) => {
   }
 }
 
+exports.removeCookie = (req, res) => {
+  res.clearCookie('spotifyToken')
+  return res.json('Cookie removed');
+}
+
+exports.decreaseVolume = async (req, res) => {
+  const {newToken} = req.body
+  console.log(newToken)
+
+  try {
+    const responseDecreaseVolume = await axios.put(`https://api.spotify.com/v1/me/player/volume?volume_percent=20`, {}, {
+      headers: {
+        Accept: 'application/json',
+        ContentType: 'application/json',
+        Authorization: `Bearer ${newToken}`,
+      }
+    })
+    console.log(responseDecreaseVolume.data)
+    res.send('Volume decreased')
+  } catch (error) {
+    console.log(error.response.data.error)
+  }
+}
+
+exports.increaseVolume = async (req, res) => {
+  const {newToken} = req.body
+
+  try {
+    let timesRunFirstInterval = 0;
+    let firstRun = setInterval( async () => {
+      const responseIncreaseVolume = await axios.put(`https://api.spotify.com/v1/me/player/volume?volume_percent=35`, {}, {
+        headers: {
+          Accept: 'application/json',
+          ContentType: 'application/json',
+          Authorization: `Bearer ${newToken}`,
+        }
+      })
+
+      timesRunFirstInterval += 1;
+      if(timesRunFirstInterval === 1){
+        clearInterval(firstRun);
+      }
+
+      console.log(responseIncreaseVolume)
+    }, 250) 
+
+    let timesRunSecondInterval = 0;
+    let secondInterval = setInterval( async () => {
+      const responseIncreaseVolume = await axios.put(`https://api.spotify.com/v1/me/player/volume?volume_percent=45`, {}, {
+        headers: {
+          Accept: 'application/json',
+          ContentType: 'application/json',
+          Authorization: `Bearer ${newToken}`,
+        }
+      })
+
+      timesRunSecondInterval += 1;
+      if(timesRunSecondInterval  === 1){
+        clearInterval(secondInterval);
+      }
+
+      console.log(responseIncreaseVolume)
+    }, 750) 
+
+    let timesRunThirdInterval = 0;
+    let thirdInterval = setInterval( async () => {
+      const responseIncreaseVolume = await axios.put(`https://api.spotify.com/v1/me/player/volume?volume_percent=70`, {}, {
+        headers: {
+          Accept: 'application/json',
+          ContentType: 'application/json',
+          Authorization: `Bearer ${newToken}`,
+        }
+      })
+
+      timesRunThirdInterval += 1;
+      if(timesRunThirdInterval  === 1){
+        clearInterval(thirdInterval);
+      }
+
+      console.log(responseIncreaseVolume)
+    }, 1000) 
+    
+    res.send('Volume increased')
+  } catch (error) {
+    console.log(error)
+  }
+}
+
 exports.test = (req, res) => {
   res.send('Hello')
 }
