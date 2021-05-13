@@ -49,11 +49,18 @@ exports.playSong = async (req, res) => {
         Authorization: `Bearer ${newToken}`,
       }
     })
-    // console.log(responsePlay)
-    res.send('Success')
+
+    const responseCurrentPlaybackState = await axios.get(`https://api.spotify.com/v1/me/player`, {
+      headers: {
+        Accept: 'application/json',
+        ContentType: 'application/json',
+        Authorization: `Bearer ${newToken}`,
+      }
+    })
+    return res.json(responseCurrentPlaybackState.data)
   } catch (error) {
-    console.log(error.response.data)
-    res.send('Error')
+    console.log(error)
+    return res.send('Error')
   }
 }
 
