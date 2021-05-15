@@ -23,7 +23,7 @@ exports.callback = async (req, res) => {
         grant_type: 'authorization_code'
       },
       headers: {
-        'Authorization': 'Basic ' + (new Buffer(
+        'Authorization': 'Basic ' + (Buffer.alloc(
             process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_SECRET
         ).toString('base64'))
       },
