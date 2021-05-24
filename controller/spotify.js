@@ -1,6 +1,7 @@
 const querystring = require('query-string');
 const request = require('request')
 const axios = require('axios')
+const Buffer = require('buffer/').Buffer
 
 exports.login = async (req, res) => {
   res.redirect('https://accounts.spotify.com/authorize?'+
@@ -23,7 +24,7 @@ exports.callback = async (req, res) => {
         grant_type: 'authorization_code'
       },
       headers: {
-        'Authorization': 'Basic ' + (Buffer.alloc(
+        'Authorization': 'Basic ' + (Buffer(
             process.env.SPOTIFY_CLIENT_ID + ':' + process.env.SPOTIFY_SECRET
         ).toString('base64'))
       },
@@ -59,7 +60,7 @@ exports.playSong = async (req, res) => {
     })
     return res.json(responseCurrentPlaybackState.data)
   } catch (error) {
-    console.log(error)
+    console.log(error ? error.response ? error.response.data : error : 'Error')
     return res.send('Error')
   }
 }
