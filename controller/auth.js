@@ -1,5 +1,3 @@
-const Cookies = require('cookies')
-
 exports.login = (req, res) => {
   const {displayName, email, photoURL} = req.body
   const userClient = {displayName, email, photoURL}
