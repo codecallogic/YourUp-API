@@ -67,6 +67,7 @@ exports.playSong = async (req, res) => {
 
 exports.removeCookie = (req, res) => {
   res.clearCookie('spotifyToken')
+  res.clearCookie('user')
   return res.json('Cookie removed');
 }
 
