@@ -65,6 +65,25 @@ exports.playSong = async (req, res) => {
   }
 }
 
+exports.activateDevice = async (req, res) => {
+
+  let deviceIDs = req.body.device_ids
+
+  try {
+    const responseActivate = await axios.put(`https://api.spotify.com/v1/me/player`, {device_ids: deviceIDs}, {
+      headers: {
+        Accept: 'application/json',
+        ContentType: 'application/json',
+        Authorization: `Bearer ${req.body.newToken}`,
+      }
+    })
+    return res.json(responseActivate.data)
+  } catch (error) {
+    console.log(error.response.data.error)
+    return res.json('Error activating a device')
+  }
+}
+
 exports.removeCookie = (req, res) => {
   res.clearCookie('spotifyToken')
   res.clearCookie('user')
