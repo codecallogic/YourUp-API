@@ -10,6 +10,6 @@ router.put('/spotify/activate-device', activateDevice)
 router.post('/spotify/remove-cookie', removeCookie)
 router.put('/spotify/volume/increase', increaseVolume)
 router.put('/spotify/volume/decrease', decreaseVolume)
-router.get('/test', test)
+router.post('/test', test)
 
 module.exports  = router

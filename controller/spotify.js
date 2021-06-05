@@ -174,6 +174,23 @@ exports.increaseVolume = async (req, res) => {
   }
 }
 
-exports.test = (req, res) => {
-  res.send('Hello')
+exports.test = async (req, res) => {
+  console.log(req.body)
+  const headerOptions = {
+    Accept: 'application/json',
+    ContentType: 'application/json',
+    Authorization: `Bearer ${process.env.TELNYX}`,
+  }
+  
+  try {
+    const responseMessage = await axios.post(`https://api.telnyx.com/v2/messages`, {from: '+16182173013', to: req.body.toUser, text: req.body.message}, {headers: headerOptions})
+    console.log(responseMessage)
+    console.log(responseMessage.data.data.cost)
+    console.log(responseMessage.data.data.from)
+    console.log(responseMessage.data.data.to)
+    res.send('HTTPS request sent')
+  } catch (error) {
+    console.log(error.response.data)
+    console.log(error.response.data.errors[0].meta)
+  }
 }

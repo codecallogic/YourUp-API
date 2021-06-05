@@ -5,7 +5,7 @@ exports.login = (req, res) => {
 
   return res.status(202).cookie("user", JSON.stringify(userClient), {
     sameSite: 'Lax',
-    expires: new Date(new Date().getTime() + (15 * 60 * 1000)),
+    expires: new Date(new Date().getTime() + (60 * 60 * 1000)),
     httpOnly: true
   })
   .send(userClient)
