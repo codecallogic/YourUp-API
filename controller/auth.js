@@ -7,7 +7,6 @@ exports.login = (req, res) => {
     sameSite: 'Lax',
     expires: new Date(new Date().getTime() + (60 * 60 * 1000)),
     httpOnly: true,
-    secure: true
   })
   .send(userClient)
 }
