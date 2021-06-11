@@ -1,6 +1,7 @@
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
+const path = require('path')
 const {addOnlineUser, removeOnlineUser} = require('./services/roomService')
 require('dotenv').config()
 
@@ -29,7 +30,7 @@ io.on('connection', (socket) => {
   socket.on('online', ({displayName, photoURL, email}) => {
     const {error, onlineUsers} = addOnlineUser({id: socket.id, name: displayName, email: email, photo: photoURL})
 
-    if(error) console.log(error)
+    if(error) io.emit('online', onlineUsers)
 
     io.emit('online', onlineUsers)
 
