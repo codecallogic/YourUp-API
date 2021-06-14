@@ -1,41 +1,83 @@
-const roomUsers = []
+const rooms = []
 const onlineUsers = []
+const mixerUsers = []
 
-exports.addOnlineUser = ({id, name, email, photo}) => {
-  console.log(id, name, email, photo)
+exports.addOnlineUser = ({id, name, email, photo, room}) => {
   name = name.trim().toLowerCase()
 
-  const existinUser = onlineUsers.find((user) => user.email === email && user.name === name)
+  const existingUser = onlineUsers.find((user) => user.email === email)
 
-  if(existinUser) return {error: 'Username with email is already online.'}
+  if(existingUser) return {error: 'Username with email is already online.'}
 
-  const onlineUser = {id, name, email, photo}
+  const onlineUser = {id, name, email, photo, room}
 
   onlineUsers.push(onlineUser)
 
-  return {onlineUsers}
+  // console.log(onlineUsers)
+  return {onlineUser, onlineUsers}
+}
+
+exports.addMixerUser = ({id, name, email, photo, room}) => {
+  console.log(name)
+  name = name.trim().toLowerCase()
+
+  const existingUser = mixerUsers.find((user) => user.email === email)
+
+  if(existingUser) return {error: 'Username with email is already online.'}
+
+  const mixerUser = {id, name, email, photo, room}
+
+  mixerUsers.push(mixerUser)
+
+  // console.log(onlineUsers)
+  return {mixerUser, mixerUsers}
 }
 
 exports.removeOnlineUser = (id) => {
   const index = onlineUsers.findIndex((user) => user.id === id)
   if(index !== -1){
-      return onlineUsers.splice(index, 1)[0]
+    onlineUsers.splice(index, 1)
+    return onlineUsers
   }
 }
 
-const addUser = ({ id, name, room}) => {
-  name = name.trim().toLowerCase()
-  room = room.trim().toLowerCase()
-
-  const existingUser = users.find((user) => user.room === room && user.name === name)
-
-  if(existingUser){
-      return { error: 'Username is taken'}
+exports.removeMixerUser = (id) => {
+  const index = mixerUsers.findIndex((user) => user.id === id)
+  if(index !== -1){
+    mixerUsers.splice(index, 1)
+    return mixerUsers
   }
+}
 
-  const user = { id, name, room }
+exports.removeRoom = (id) => {
+  const index = rooms.findIndex((room) => room.id === id)
+  if(index !== -1){
+    rooms.splice(index, 1)
+    return rooms
+  }
+}
 
-  users.push(user)
+exports.addRoom = ({id, room}) => {
+  // console.log(id, room)
+  roomName = room.trim().toLowerCase()
 
-  return { user }
+  const existingRoom = rooms.find((room) => room.roomName === roomName)
+
+  if(existingRoom) return {error: 'Room with that name already exists'}
+
+  const onlineRoom = {id, roomName}
+
+  rooms.push(onlineRoom)
+
+  // console.log(rooms)
+
+  return {rooms}
+}
+
+exports.getUserInRoom = (room) => {
+  return onlineUsers.filter((user) => user.room === room)
+}
+
+exports.getMixerUsers = () => {
+  return mixerUsers
 }
