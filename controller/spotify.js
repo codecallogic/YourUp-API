@@ -61,6 +61,7 @@ exports.playSong = async (req, res) => {
     })
     return res.json(responseCurrentPlaybackState.data)
   } catch (error) {
+    console.log(error)
     console.log(error ? error.response ? error.response.data : error : 'Error')
     return res.send('Error')
   }
@@ -80,6 +81,7 @@ exports.activateDevice = async (req, res) => {
     })
     return res.json(responseActivate.data)
   } catch (error) {
+    console.log(error)
     console.log(error.response.data.error)
     return res.json('Error activating a device')
   }

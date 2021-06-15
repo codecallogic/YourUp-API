@@ -29,6 +29,7 @@ const server = app.listen(port, () => console.log(`Server is currently running o
 const io = require('socket.io')(server, {cookie: false })
 
 io.on('connection', (socket) => {
+  // socket.disconnect();
   
   socket.on('online', ({displayName, photoURL, email}, callback) => {
     const {error, onlineUsers} = addOnlineUser({id: socket.id, name: displayName, email: email, photo: photoURL})
