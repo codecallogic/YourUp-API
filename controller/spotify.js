@@ -62,7 +62,7 @@ exports.playSong = async (req, res) => {
     return res.json(responseCurrentPlaybackState.data)
   } catch (error) {
     console.log(error)
-    console.log(error ? error.response ? error.response.data : error : 'Error')
+    console.log(error ? error.response ? console.log(error.response.data) : error : 'Error')
     return res.send('Error')
   }
 }
@@ -79,10 +79,11 @@ exports.activateDevice = async (req, res) => {
         Authorization: `Bearer ${req.body.newToken}`,
       }
     })
+    console.log(responseActivate.data)
     return res.json(responseActivate.data)
   } catch (error) {
     console.log(error)
-    console.log(error.response.data.error)
+    if(error) error ? error.response ? console.log(error.response.data.error) : console.log(error) : console.log(error)
     return res.json('Error activating a device')
   }
 }
