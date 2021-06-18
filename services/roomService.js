@@ -2,14 +2,14 @@ const rooms = []
 const onlineUsers = []
 const mixerUsers = []
 
-exports.addOnlineUser = ({id, name, email, photo, room}) => {
+exports.addOnlineUser = ({id, name, email, photoURL, room}) => {
   name = name.trim().toLowerCase()
 
   const existingUser = onlineUsers.find((user) => user.email === email)
 
   if(existingUser) return {error: 'Username with email is already online.'}
 
-  const onlineUser = {id, name, email, photo, room}
+  const onlineUser = {id, name, email, photoURL, room}
 
   onlineUsers.push(onlineUser)
 
@@ -17,15 +17,15 @@ exports.addOnlineUser = ({id, name, email, photo, room}) => {
   return {onlineUser, onlineUsers}
 }
 
-exports.addMixerUser = ({id, name, email, photo, room}) => {
-  console.log(name)
+exports.addMixerUser = ({id, name, email, photoURL, room}) => {
+  // console.log(name)
   name = name.trim().toLowerCase()
 
   const existingUser = mixerUsers.find((user) => user.email === email)
 
   if(existingUser) return {error: 'Username with email is already online.'}
 
-  const mixerUser = {id, name, email, photo, room}
+  const mixerUser = {id, name, email, photoURL, room}
 
   mixerUsers.push(mixerUser)
 

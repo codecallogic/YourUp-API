@@ -4,6 +4,8 @@ const cors = require('cors')
 const path = require('path')
 const {addOnlineUser, addMixerUser, removeOnlineUser, removeMixerUser, removeRoom, addRoom, getUserInRoom, getMixerUsers} = require('./services/roomService')
 require('dotenv').config()
+var ip = require("ip");
+console.dir ( ip.address() );
 
 const app = express()
 
@@ -32,7 +34,7 @@ io.on('connection', (socket) => {
   // socket.disconnect();
   
   socket.on('online', ({displayName, photoURL, email}, callback) => {
-    const {error, onlineUsers} = addOnlineUser({id: socket.id, name: displayName, email: email, photo: photoURL})
+    const {error, onlineUsers} = addOnlineUser({id: socket.id, name: displayName, email: email, photoURL: photoURL})
 
     if(error) io.emit('online', onlineUsers)
 
@@ -70,32 +72,24 @@ io.on('connection', (socket) => {
   })
 
   socket.on('online-mixer', ({displayName, photoURL, email}, callback) => {
-    const {error, mixerUsers} = addMixerUser({id: socket.id, name: displayName, email: email, photo: photoURL})
+    console.log(displayName, photoURL, email)
+    const {error, mixerUsers} = addMixerUser({id: socket.id, name: displayName, email: email, photoURL: photoURL})
 
     if(error) io.emit('online-mixer', mixerUsers)
     socket.join('online-mixer')
-
-    let allUsers = getMixerUsers()
-
-    console.log(allUsers)
-    console.log(mixerUsers)
 
     io.emit('online-mixer', mixerUsers)
 
     callback(mixerUsers)
   })
 
-  socket.on('send-room', async ({id, room}, callBack) => {
-    const ids = await io.in("online-mixer").fetchSockets()
-    ids.forEach((item) => {
-      console.log(item.id)
-    })
+  socket.on('send-room', async ({id, room, group}, callBack) => {
     socket.join(room)
-    if(socket.id !== id) io.to(id).emit('join-room', room)
+    if(socket.id !== id) io.to(id).emit('join-room', {room, group})
   })
 
-  socket.on('send-song', (room) => {
-    console.log(room)
+  socket.on('send-song', (user) => {
+    console.log(user)
   })
 
   socket.on('disconnect', () => {
