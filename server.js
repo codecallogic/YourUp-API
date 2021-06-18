@@ -93,7 +93,7 @@ io.on('connection', (socket) => {
   socket.on('send-song', ({userInGroup, uri, newCounter}) => {
     const clients = io.sockets.adapter.rooms.get('room1');
     console.log(clients)
-    io.to(userInGroup.room).emit('play-song', {uri, newCounter})
+    socket.broadcast.to(userInGroup.room).emit('play-song', {uri, newCounter})
   })
 
   socket.on('disconnect', () => {

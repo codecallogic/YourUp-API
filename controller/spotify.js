@@ -107,7 +107,7 @@ exports.decreaseVolume = async (req, res) => {
       }
     })
     console.log(responseDecreaseVolume.data)
-    res.send('Volume decreased')
+    return res.send('Volume decreased')
   } catch (error) {
     console.log(error.response.data.error)
   }
@@ -132,8 +132,8 @@ exports.increaseVolume = async (req, res) => {
         clearInterval(firstRun);
       }
 
-      console.log(responseIncreaseVolume)
-    }, 250) 
+      // console.log(responseIncreaseVolume)
+    }, 250)
 
     let timesRunSecondInterval = 0;
     let secondInterval = setInterval( async () => {
@@ -150,12 +150,12 @@ exports.increaseVolume = async (req, res) => {
         clearInterval(secondInterval);
       }
 
-      console.log(responseIncreaseVolume)
-    }, 750) 
+      // console.log(responseIncreaseVolume)
+    }, 500)
 
     let timesRunThirdInterval = 0;
     let thirdInterval = setInterval( async () => {
-      const responseIncreaseVolume = await axios.put(`https://api.spotify.com/v1/me/player/volume?volume_percent=70`, {}, {
+      const responseIncreaseVolume = await axios.put(`https://api.spotify.com/v1/me/player/volume?volume_percent=55`, {}, {
         headers: {
           Accept: 'application/json',
           ContentType: 'application/json',
@@ -168,10 +168,28 @@ exports.increaseVolume = async (req, res) => {
         clearInterval(thirdInterval);
       }
 
-      console.log(responseIncreaseVolume)
+      // console.log(responseIncreaseVolume)
+    }, 750) 
+
+    let timesRunFourthInterval = 0;
+    let fourthInterval = setInterval( async () => {
+      const responseIncreaseVolume = await axios.put(`https://api.spotify.com/v1/me/player/volume?volume_percent=70`, {}, {
+        headers: {
+          Accept: 'application/json',
+          ContentType: 'application/json',
+          Authorization: `Bearer ${newToken}`,
+        }
+      })
+
+      timesRunFourthInterval += 1;
+      if(timesRunFourthInterval  === 1){
+        clearInterval(fourthInterval);
+      }
+
+      // console.log(responseIncreaseVolume)
     }, 1000) 
     
-    res.send('Volume increased')
+    return res.send('Volume increased')
   } catch (error) {
     console.log(error)
   }
