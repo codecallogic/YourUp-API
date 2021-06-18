@@ -72,24 +72,28 @@ io.on('connection', (socket) => {
   })
 
   socket.on('online-mixer', ({displayName, photoURL, email}, callback) => {
-    console.log(displayName, photoURL, email)
+    console.log(socket.id, displayName, photoURL, email)
     const {error, mixerUsers} = addMixerUser({id: socket.id, name: displayName, email: email, photoURL: photoURL})
 
     if(error) io.emit('online-mixer', mixerUsers)
-    socket.join('online-mixer')
 
     io.emit('online-mixer', mixerUsers)
 
     callback(mixerUsers)
   })
 
-  socket.on('send-room', async ({id, room, group}, callBack) => {
-    socket.join(room)
-    if(socket.id !== id) io.to(id).emit('join-room', {room, group})
+  socket.on('send-room', ({id, room, group}, callBack) => {
+    io.to(id).emit('get-room', {room, group})
   })
 
-  socket.on('send-song', (user) => {
-    console.log(user)
+  socket.on('join-room', (room) => {
+    socket.join(room)
+  })
+
+  socket.on('send-song', ({userInGroup, uri, newCounter}) => {
+    const clients = io.sockets.adapter.rooms.get('room1');
+    console.log(clients)
+    io.to(userInGroup.room).emit('play-song', {uri, newCounter})
   })
 
   socket.on('disconnect', () => {
