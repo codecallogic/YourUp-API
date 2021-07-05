@@ -2,7 +2,7 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const path = require('path')
-const {addOnlineUser, addMixerUser, removeOnlineUser, removeMixerUser, removeRoom, addRoom, getUserInRoom, getMixerUsers} = require('./services/roomService')
+const {addOnlineUser, addMixerUser, removeOnlineUser, removeMixerUser, removeRoom, addRoom, enterRoom, allRooms, getUserInRoom, getMixerUsers} = require('./services/roomService')
 require('dotenv').config()
 var ip = require("ip");
 console.dir ( ip.address() );
@@ -49,6 +49,11 @@ io.on('connection', (socket) => {
     io.emit('online', onlineUsers)
   })
 
+  socket.on('notification', ({type, user, room, room_mode, newUser}) => {
+    console.log(room_mode)
+    io.to(user.id).emit(type, {msg: `${newUser.displayName} has created room ${room}. Room mode is ` + (room_mode === 'back_to_back' ? ` only room master can select a DJ.` : ` anyone can be a DJ.`), type: true})
+  })
+  
   socket.on('group-invite', ({user, newUser}) => {
     io.to(user.id).emit('invite', {msg: `${newUser.displayName} has added you to a group.`, from: newUser, currentUser: user})
   })
@@ -75,18 +80,28 @@ io.on('connection', (socket) => {
     console.log(socket.id, displayName, photoURL, email)
     const {error, mixerUsers} = addMixerUser({id: socket.id, name: displayName, email: email, photoURL: photoURL})
 
-    if(error) io.emit('online-mixer', mixerUsers)
+    if(error) return io.emit('online-mixer', mixerUsers)
 
     io.emit('online-mixer', mixerUsers)
 
     callback(mixerUsers)
   })
 
-  socket.on('send-room', ({id, room, group}, callBack) => {
-    io.to(id).emit('get-room', {room, group})
+  socket.on('send-room', ({id, room, mode, pin, group}, callback) => {
+
+    // TODO: Add item pin to rooms 
+    io.to(id).emit('get-room', {room, mode, pin, group})
+    
+    const {error, rooms} = addRoom({id: socket.id, room, mode, pin})
+
+    if(error) return callback({error: error})
+
+    io.emit('rooms', rooms)
+
+    callback({room: rooms})
   })
 
-  socket.on('join-room', (room) => {
+  socket.on('join-room', async (room) => {
     socket.join(room)
   })
 
@@ -94,6 +109,15 @@ io.on('connection', (socket) => {
     const clients = io.sockets.adapter.rooms.get('room1');
     console.log(clients)
     socket.broadcast.to(userInGroup.room).emit('play-song', {uri, newCounter})
+  })
+
+  socket.on('enter-room', ({pin}) => {
+    let {rooms} = allRooms()
+    console.log(rooms)
+    console.log(socket.id)
+    const {existingRoom} = enterRoom({pin})
+    console.log(existingRoom)
+
   })
 
   socket.on('disconnect', () => {

@@ -19,5 +19,6 @@ exports.invite = async (req, res) => {
   } catch (error) {
     // console.log(error)
     console.log(error.response.data.errors[0].meta)
+    return res.status(400).json('Invalid number, please try again.')
   }
 }

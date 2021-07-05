@@ -57,15 +57,15 @@ exports.removeRoom = (id) => {
   }
 }
 
-exports.addRoom = ({id, room}) => {
+exports.addRoom = ({id, room, pin}) => {
   // console.log(id, room)
   roomName = room.trim().toLowerCase()
 
-  const existingRoom = rooms.find((room) => room.roomName === roomName)
+  const existingRoom = rooms.find((room) => room.room === room)
 
   if(existingRoom) return {error: 'Room with that name already exists'}
 
-  const onlineRoom = {id, roomName}
+  const onlineRoom = {id, room, pin}
 
   rooms.push(onlineRoom)
 
@@ -76,6 +76,16 @@ exports.addRoom = ({id, room}) => {
 
 exports.getUserInRoom = (room) => {
   return onlineUsers.filter((user) => user.room === room)
+}
+
+exports.allRooms = () => {
+  return {rooms}
+}
+
+exports.enterRoom = ({pin}) => {
+  console.log(pin)
+  const existingRoom = rooms.find((room) => {if(room.pin == pin) return room})
+  return {existingRoom}
 }
 
 exports.getMixerUsers = () => {
