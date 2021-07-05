@@ -101,7 +101,7 @@ io.on('connection', (socket) => {
     callback({room: rooms})
   })
 
-  socket.on('join-room', async (room) => {
+  socket.on('join-room', (room) => {
     socket.join(room)
   })
 
@@ -111,13 +111,14 @@ io.on('connection', (socket) => {
     socket.broadcast.to(userInGroup.room).emit('play-song', {uri, newCounter})
   })
 
-  socket.on('enter-room', ({pin}) => {
+  socket.on('enter-room', ({pin}, callback) => {
     let {rooms} = allRooms()
-    console.log(rooms)
-    console.log(socket.id)
-    const {existingRoom} = enterRoom({pin})
-    console.log(existingRoom)
+    const {error, existingRoom} = enterRoom({pin})
 
+    if(error) return callback({error: error})
+
+    callback({room: existingRoom})
+    
   })
 
   socket.on('disconnect', () => {

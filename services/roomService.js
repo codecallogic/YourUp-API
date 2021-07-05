@@ -83,8 +83,10 @@ exports.allRooms = () => {
 }
 
 exports.enterRoom = ({pin}) => {
-  console.log(pin)
   const existingRoom = rooms.find((room) => {if(room.pin == pin) return room})
+  
+  if(!existingRoom) return {error: 'Room with that pin does not exists'}
+  
   return {existingRoom}
 }
 
