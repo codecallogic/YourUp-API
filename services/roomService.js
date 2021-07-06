@@ -57,35 +57,41 @@ exports.removeRoom = (id) => {
   }
 }
 
-exports.addRoom = ({id, room, pin}) => {
+exports.addRoom = ({id, room, mode, pin, group}) => {
   // console.log(id, room)
-  roomName = room.trim().toLowerCase()
+  room = room.trim().toLowerCase()
 
-  const existingRoom = rooms.find((room) => room.room === room)
+  const existingRoom = rooms.filter((item) => {
+    if(item.room === room) return item
+  })
 
-  if(existingRoom) return {error: 'Room with that name already exists'}
+  if(existingRoom[0]) existingRoom[0].group = group
+  
+  if(existingRoom.length > 0) return {error: 'Room with that name already exists'}
 
-  const onlineRoom = {id, room, pin}
+  const onlineRoom = {id, room, mode, pin, group}
 
   rooms.push(onlineRoom)
 
-  // console.log(rooms)
-
   return {rooms}
 }
 
-exports.getUserInRoom = (room) => {
-  return onlineUsers.filter((user) => user.room === room)
-}
+exports.getUsersInRoom = (pin, roomName) => {
+  if(pin){
+    let usersInRoom = rooms.filter((room) => room.pin == pin)
+    return {usersInRoom}
+  }
 
-exports.allRooms = () => {
-  return {rooms}
+  if(roomName){
+    let usersInRoom = rooms.find((room) => {if(room.room == roomName) return room})
+    return {usersInRoom}
+  }
 }
 
 exports.enterRoom = ({pin}) => {
   const existingRoom = rooms.find((room) => {if(room.pin == pin) return room})
   
-  if(!existingRoom) return {error: 'Room with that pin does not exists'}
+  if(!existingRoom) return {error: 'Room with that pin does not exist'}
   
   return {existingRoom}
 }

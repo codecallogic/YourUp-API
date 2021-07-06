@@ -2,7 +2,7 @@ const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
 const path = require('path')
-const {addOnlineUser, addMixerUser, removeOnlineUser, removeMixerUser, removeRoom, addRoom, enterRoom, allRooms, getUserInRoom, getMixerUsers} = require('./services/roomService')
+const {addOnlineUser, addMixerUser, removeOnlineUser, removeMixerUser, removeRoom, addRoom, enterRoom, allRooms, getUsersInRoom, getMixerUsers, updateUsersInRoom} = require('./services/roomService')
 require('dotenv').config()
 var ip = require("ip");
 console.dir ( ip.address() );
@@ -33,8 +33,8 @@ const io = require('socket.io')(server, {cookie: false })
 io.on('connection', (socket) => {
   // socket.disconnect();
   
-  socket.on('online', ({displayName, photoURL, email}, callback) => {
-    const {error, onlineUsers} = addOnlineUser({id: socket.id, name: displayName, email: email, photoURL: photoURL})
+  socket.on('online', ({name, photoURL, email}, callback) => {
+    const {error, onlineUsers} = addOnlineUser({id: socket.id, name: name, email: email, photoURL: photoURL})
 
     if(error) io.emit('online', onlineUsers)
 
@@ -51,11 +51,11 @@ io.on('connection', (socket) => {
 
   socket.on('notification', ({type, user, room, room_mode, newUser}) => {
     console.log(room_mode)
-    io.to(user.id).emit(type, {msg: `${newUser.displayName} has created room ${room}. Room mode is ` + (room_mode === 'back_to_back' ? ` only room master can select a DJ.` : ` anyone can be a DJ.`), type: true})
+    io.to(user.id).emit(type, {msg: `${newUser.name} has created room ${room}. Room mode is ` + (room_mode === 'back_to_back' ? ` only room master can select a DJ.` : ` anyone can be a DJ.`), type: true})
   })
   
   socket.on('group-invite', ({user, newUser}) => {
-    io.to(user.id).emit('invite', {msg: `${newUser.displayName} has added you to a group.`, from: newUser, currentUser: user})
+    io.to(user.id).emit('invite', {msg: `${newUser.name} has added you to a group.`, from: newUser, currentUser: user})
   })
 
   socket.on('remove-pending', ({user, from}) => {
@@ -76,9 +76,9 @@ io.on('connection', (socket) => {
     io.to(id).emit('redirect', {redirect: true})
   })
 
-  socket.on('online-mixer', ({displayName, photoURL, email}, callback) => {
-    console.log(socket.id, displayName, photoURL, email)
-    const {error, mixerUsers} = addMixerUser({id: socket.id, name: displayName, email: email, photoURL: photoURL})
+  socket.on('online-mixer', ({name, photoURL, email}, callback) => {
+    console.log(socket.id, name, photoURL, email)
+    const {error, mixerUsers} = addMixerUser({id: socket.id, name: name, email: email, photoURL: photoURL})
 
     if(error) return io.emit('online-mixer', mixerUsers)
 
@@ -87,37 +87,71 @@ io.on('connection', (socket) => {
     callback(mixerUsers)
   })
 
-  socket.on('send-room', ({id, room, mode, pin, group}, callback) => {
+  socket.on('send-room', ({id, room, mode, pin, group}, callback) => { 
 
-    // TODO: Add item pin to rooms 
     io.to(id).emit('get-room', {room, mode, pin, group})
+
+    // console.log(group)
     
-    const {error, rooms} = addRoom({id: socket.id, room, mode, pin})
+    const {error, rooms} = addRoom({id, room, mode, pin, group})
 
     if(error) return callback({error: error})
+    // console.log(group)
+    console.log(rooms[0].group)
 
     io.emit('rooms', rooms)
 
     callback({room: rooms})
   })
 
-  socket.on('join-room', (room) => {
+  socket.on('join-room', ({room, data}) => {
     socket.join(room)
   })
 
-  socket.on('send-song', ({userInGroup, uri, newCounter}) => {
+  socket.on('send-song', ({activeRoom, uri, newCounter}) => {
     const clients = io.sockets.adapter.rooms.get('room1');
-    console.log(clients)
-    socket.broadcast.to(userInGroup.room).emit('play-song', {uri, newCounter})
+
+    let {usersInRoom} = getUsersInRoom(null, activeRoom)
+
+    if(usersInRoom.group.length > 0){
+      usersInRoom.group.forEach((item) => {
+        io.to(item.id).emit('play-song', {uri, newCounter})
+      })
+    }
+
+    // socket.to()
+    
+    // socket.broadcast.to(userInGroup.room).emit('play-song', {uri, newCounter})
   })
 
-  socket.on('enter-room', ({pin}, callback) => {
-    let {rooms} = allRooms()
+  socket.on('enter-room', ({pin, newUser}, callback) => {
+    let {usersInRoom} = getUsersInRoom(pin)
+    if(usersInRoom.length > 0){
+      let room = usersInRoom[0].room
+      let mode = usersInRoom[0].mode
+
+      newUser.id = socket.id
+      newUser.room = room
+      newUser.mode = mode
+
+      usersInRoom.forEach((item) => {
+        item.group.push(newUser)
+      })
+
+      // console.log(usersInRoom[0])
+
+      usersInRoom[0].group.forEach((item) => {
+        io.to(item.id).emit('new-user', usersInRoom[0].group)
+      })
+
+      // updateUsersInRoom(pin, usersInRoom[0].group)
+    }
+
     const {error, existingRoom} = enterRoom({pin})
 
     if(error) return callback({error: error})
 
-    callback({room: existingRoom})
+    callback(existingRoom)
     
   })
 
