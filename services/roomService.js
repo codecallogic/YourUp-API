@@ -77,6 +77,7 @@ exports.addRoom = ({id, room, mode, pin, group}) => {
 }
 
 exports.getUsersInRoom = (pin, roomName) => {
+  console.log(pin, roomName)
   if(pin){
     let usersInRoom = rooms.filter((room) => room.pin == pin)
     return {usersInRoom}

@@ -110,18 +110,15 @@ io.on('connection', (socket) => {
 
   socket.on('send-song', ({activeRoom, uri, newCounter}) => {
     const clients = io.sockets.adapter.rooms.get('room1');
+    if(activeRoom){
+      let {usersInRoom} = getUsersInRoom(null, activeRoom)
 
-    let {usersInRoom} = getUsersInRoom(null, activeRoom)
-
-    if(usersInRoom.group.length > 0){
-      usersInRoom.group.forEach((item) => {
-        io.to(item.id).emit('play-song', {uri, newCounter})
-      })
+      if(usersInRoom.group.length > 0){
+        usersInRoom.group.forEach((item) => {
+          io.to(item.id).emit('play-song', {uri, newCounter})
+        })
+      }
     }
-
-    // socket.to()
-    
-    // socket.broadcast.to(userInGroup.room).emit('play-song', {uri, newCounter})
   })
 
   socket.on('enter-room', ({pin, newUser}, callback) => {
